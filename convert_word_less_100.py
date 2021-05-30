@@ -37,3 +37,4 @@ if int(num) < 20:
     print(zeroth_base.get(num))
 else:
     print(first_base.get(num[0]) + " " + zeroth_base.get(num[1]))
+
