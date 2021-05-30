@@ -6,4 +6,3 @@ def toggle(character):
 
 character = input("A Character: ")
 print(toggle(character))
-
