@@ -1,4 +1,5 @@
 zeroth_base = {
+    "0" : "",
     "1" : "one",
     "2" : "Two",
     "3" : "Three",
@@ -27,14 +28,12 @@ first_base = {
     "5" : "Fifty",
     "6" : "Sixty",
     "7" : "Seventy",
-    "8" : "Eight",
+    "8" : "Eighty",
     "9" : "Ninety"
 }
 
 num = input("A number: ")
 if int(num) < 20:
     print(zeroth_base.get(num))
-elif (int(num) % 10) == 0:
-    print(first_base.get(num[0]))
 else:
     print(first_base.get(num[0]) + " " + zeroth_base.get(num[1]))
