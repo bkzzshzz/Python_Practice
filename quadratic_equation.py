@@ -5,7 +5,7 @@ def quad(x, a, b ,c):
     y = []
 
     for i in range(len(x)):
-        y.append(a * x[i] ** 3 + b * x[i] + c)
+        y.append(a * x[i] ** 2 + b * x[i] + c)
     return y
 
 
@@ -16,4 +16,6 @@ if __name__ == '__main__':
     y = quad(x, 1, 2, 3)
     print(len(x), len(y))
     plt.plot(x, y)
+    plt.xlabel('x')
+    plt.ylabel('y')
     plt.show()
