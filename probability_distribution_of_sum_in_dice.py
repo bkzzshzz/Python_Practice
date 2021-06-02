@@ -25,11 +25,10 @@ count = {
 }
 a = []*2
 b = []*2
-for i in range(10):
+for i in range(1000):
     b = [random.randint(1,6) , random.randint(1,6)]
     a.append(b.copy())
-print(a)
-for i in range(10):
+for i in range(1000):
 
     count[sum(a[i])] += 1
 print(f'The probabity of sum being 2 is {count[2]/ 1000}')
