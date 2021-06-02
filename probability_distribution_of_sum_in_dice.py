@@ -31,17 +31,9 @@ for i in range(1000):
 for i in range(1000):
 
     count[sum(a[i])] += 1
-print(f'The probabity of sum being 2 is {count[2]/ 1000}')
-print(f'The probabity of sum being 3 is {count[3] / 1000}')
-print(f'The probabity of sum being 4 is {count[4] / 1000}')
-print(f'The probabity of sum being 5 is {count[5]/ 1000}')
-print(f'The probabity of sum being 6 is {count[6] / 1000}')
-print(f'The probabity of sum being 7 is {count[7] / 1000}')
-print(f'The probabity of sum being 8 is {count[8] / 1000}')
-print(f'The probabity of sum being 9 is {count[9] / 1000}')
-print(f'The probabity of sum being 10 is {count[10] / 1000}')
-print(f'The probabity of sum being 11 is {count[11] / 1000}')
-print(f'The probabity of sum being 12 is {count[12] / 1000}')
+for i in range(2, 13):
+    print(f'The probability of sum being {i} is {count[i] / 1000}')
+
 
 
 
