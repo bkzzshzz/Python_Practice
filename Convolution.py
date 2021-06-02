@@ -9,16 +9,14 @@ print(y)
 c = 0
 for i in range(len(y) - 2):
     z.append(y[i:i+3])
-#     c += 1
-# print(c)
+
 print(z)
 convul = []
 sum = 0
+
 for i in range(len(z)):
     for j in range(3):
         sum = sum + z[i][j] * h[j]
     convul.append(sum)
+
 print(convul)
-        
-
-
