@@ -1,28 +1,30 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
-seq = []
 element = 4
 sum_at_n= []
-each_sum = 0
 n = []
 
-for i in range(100):
-    seq.append(element)
-    element = element / 2
+def t_i(i):
+    a = element
+    for lp in range(1, i):
+        a = 0.5 * a
+    return a
 
-for i in  range(100):
-    each_sum = 0
-    n.append(i)
+def s_N(N):
+    s = 0
+    for i in range(N):
+        s = s + t_i(i+1)
+    return s
 
-    for j in range(i+1):
-        each_sum = each_sum + seq[j]
-       
-    sum_at_n.append(each_sum)
+n_all = list(range(1, 20))
+for n in n_all:
+    s = s_N(n)
+    print (f'The sum of {n} terms is {s}')
+    sum_at_n.append(s)
+    
 
-print(n)
-plt.plot(n, sum_at_n)
+plt.plot(n_all, sum_at_n)
 plt.xlabel('n')
 plt.ylabel('Sn')
 plt.show()
-    
