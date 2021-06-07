@@ -83,7 +83,7 @@ class Bus(Vehicle):
 bus1 = Bus(170, 1500, 50)
 bus2 = Bus(180, 1600, 45)
 bus3 = Bus(1574, 8900, 65)
-bus3 = Vehicle(156, 7800, 89)
+bus4 = Vehicle(156, 7800, 89)
 # help(Bus) #to get help
 # bus1 = Bus("Koteshowr")
 print(bus2.show_seat_capacity())
@@ -91,6 +91,11 @@ print(bus2.seat_capacity)
 print(Vehicle.show_seat_capacity(bus2))
 print(type(bus1))
 print(type(bus3))
+print(isinstance(bus1, Bus))
+print(isinstance(bus3, Vehicle))
+print(isinstance(bus4, Bus))
+print(issubclass(Bus, Vehicle))
+print(issubclass(Vehicle, Bus))
 # help(type)
 
 
