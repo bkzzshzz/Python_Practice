@@ -9,11 +9,19 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             self.path = 'blog.html'
         elif self.path == "/home.html":
             file_list = os.listdir("./blog-posts")
-            open("home.html","w").write("<!DOCTYPE html>\n<html>\n<head>\n<title>TEST FILE</title>\n</head>\n<body>\n<p>The list of files in \\blog-posts folder are:</p>\n<ul>\n")
+            template = open("home.template.html", "r").read()
+            new_file = open("home.html","w").write(template)
+            
+            
             for i in range(len(file_list)):
-                open("home.html", "a").write("<li><a href=\"{filename" + str(i) +"}\">{filename" + str(i) + "}</li>\n")
-            open("home.html","a").write("</ul>\n</body>\n</html>\n")
-            newfile = open("home.html").read().format(filename0 = file_list[0], filename1 = file_list[1], filename2 = file_list[2])
+                print(i)
+                link_list = "<li><a href=\"{filename" + str(i) +"}\">{filename" + str(i) + "}</li>\n{variable}\n"
+                print(link_list)
+                new_file = open("home.html").read().format(variable = link_list)
+                print(new_file)
+                open("home.html", "w").write(new_file)
+            
+            newfile = open("home.html").read().format(filename0 = file_list[0], filename1 = file_list[1], filename2 = file_list[2], variable = "")
             open("home.html", "w").write(newfile)
             # filename = "filename"
             # for i in range(len(file_list)):
