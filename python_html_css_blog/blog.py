@@ -23,8 +23,12 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 # Following code extracts title form <title> -------- </title> section of each file
                 file_handle = open("./blog-posts/" + name_of_file)
                 file_content_str = file_handle.read()
-                starting_pos = file_content_str.find('<title>') + len('<title>')
-                ending_pos = file_content_str.find('</title>')
+                print(file_content_str)
+                temp_file = file_content_str
+                temp_file = temp_file.lower()
+                print(temp_file)
+                starting_pos = temp_file.find('<title>') + len('<title>')
+                ending_pos = temp_file.find('</title>')
                 title_from_file = file_content_str[starting_pos:ending_pos]
                 list_of_links = list_of_links + link_for_single_file.format(file_name = name_of_file, file_title = title_from_file)
             
