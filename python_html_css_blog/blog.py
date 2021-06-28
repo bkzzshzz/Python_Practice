@@ -4,7 +4,11 @@ import os
 
 PORT = 8001
 class blog_server(http.server.SimpleHTTPRequestHandler):
+   
     def do_GET(self):
+
+        navbar = open("partials/header.template.html").read()
+        body_script = open("partials/scripts.template.html").read()
         
         if self.path == '/':
             self.path = '/home.html'
@@ -32,8 +36,25 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 title_from_file = file_content_str[starting_pos:ending_pos]
                 list_of_links = list_of_links + link_for_single_file.format(file_name = name_of_file, file_title = title_from_file)
             
-            new_file = template_string.format(variable = list_of_links)
-            open("home.html", "w").write(new_file) 
+            new_file = template_string.format(variable = list_of_links, header = navbar, scripts = body_script)
+            open("home.html", "w").write(new_file)
+        elif self.path == "/book_reviews.html":
+            template_string = open("book_reviews.template.html").read().format(header = navbar, scripts = body_script)
+            open("bool_reviews.html", "w").write(template_string)
+        elif self.path == "/gallery.html":
+            template_string = open("gallery.template.html").read().format(header = navbar, scripts = body_script)
+            open("gallery.html", "w").write(template_string)
+        elif self.path == "/programming_journey.html":
+            template_string = open("programming_journey.template.html").read().format(header = navbar, scripts = body_script)
+            open("programming_journey.html", "w").write(template_string)
+        elif self.path == "/poems.html":
+            template_string = open("poems.template.html").read().format(header = navbar, scripts = body_script)
+            open("poems.html", "w").write(template_string)
+        elif self.path == "/my_cv.html":
+            template_string = open("my_cv.template.html").read().format(header = navbar, scripts = body_script)
+            open("my_cv.html", "w").write(template_string)
+        else:
+            self.path = "404.html"
         
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
