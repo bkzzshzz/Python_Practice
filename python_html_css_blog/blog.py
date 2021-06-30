@@ -3,6 +3,8 @@ import socketserver
 import os
 
 PORT = 8000
+temp_folder =  'rendered_html/'
+
 class blog_server(http.server.SimpleHTTPRequestHandler):
    
     def do_GET(self):
@@ -56,16 +58,16 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             open("my_cv.html", "w").write(template_string)
         elif self.path == "/blog-posts/first-post.html":
             template_string = open("blog-posts/first-post.html").read().format(header = navbar, scripts = body_script)
-            open("non-template-blog-posts/first-post.html", "w").write(template_string)
-            self.path = "non-template-blog-posts/first-post.html"
+            open(temp_folder + "first-post.html", "w").write(template_string)
+            self.path = temp_folder + "first-post.html"
         elif self.path == "/blog-posts/my-childhood.html":
             template_string = open("blog-posts/my-childhood.html").read().format(header = navbar, scripts = body_script)
-            open("non-template-blog-posts/my-childhood.html", "w").write(template_string)
-            self.path = "non-template-blog-posts/my-childhood.html"
+            open(temp_folder + "my-childhood.html", "w").write(template_string)
+            self.path = temp_folder + "my-childhood.html"
         elif self.path == "/blog-posts/who-is-syd-barret.html":
             template_string = open("blog-posts/who-is-syd-barret.html").read().format(header = navbar, scripts = body_script)
-            open("non-template-blog-posts/who-is-syd-barret.html", "w").write(template_string)
-            self.path = "non-template-blog-posts/who-is-syd-barret.html"
+            open(temp_folder + "who-is-syd-barret.html", "w").write(template_string)
+            self.path = temp_folder + "who-is-syd-barret.html"
         else:
             self.path = "404.html"
         print(f'MY SERVER: The redirected path is: {self.path}')
