@@ -9,21 +9,28 @@ template_folder = 'template_html/'
 class blog_server(http.server.SimpleHTTPRequestHandler):
    
     def do_GET(self):
-
         navbar = open("partials/header.template.html").read()
         body_script = open("partials/scripts.template.html").read()
-        print(f'MY SERVER: The requested path is: {self.path}')
+        print(f'BLOG SERVER: The requested path is: {self.path}')
 
-              
-        
         if self.path == '/':
-            self.path = rendered_folder + 'home.html'
+            self.path = '/home.html'
 
-        if self.path == "/home.html" or self.path == "/":
+        if self.path[0:12] == '/blog-posts/':
+            requested_post_filename = self.path[12:]
+            try:
+                template_string = open ('blog-posts/' + requested_post_filename).read().format(header = navbar, scripts = body_script)
+                open(rendered_folder + requested_post_filename, "w").write(template_string)
+                self.path = rendered_folder + requested_post_filename
+            except Exception as e:
+                print ('BLOG SERVER: caught an exception while trying to access that file ')
+                print (f'BLOG SERVER: {e}')
+                self.path = "404.html"
+
+        elif self.path == '/home.html':
             file_list = os.listdir("./blog-posts")
             template_string = open(template_folder + "home.template.html", "r").read()
-            
-            
+
             link_for_single_file = '''
             <li><a href="blog-posts/{file_name}">{file_title}</a></li>
             '''
@@ -43,43 +50,40 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             new_file = template_string.format(variable = list_of_links, header = navbar, scripts = body_script)
             open(rendered_folder + "home.html", "w").write(new_file)
             self.path = rendered_folder + "home.html"
+
         elif self.path == "/book_reviews.html":
             template_string = open(template_folder + "book_reviews.template.html").read().format(header = navbar, scripts = body_script)
             open(rendered_folder + "book_reviews.html", "w").write(template_string)
             self.path = rendered_folder + "book_reviews.html"
+
         elif self.path == "/gallery.html":
             template_string = open(template_folder + "gallery.template.html").read().format(header = navbar, scripts = body_script)
             open(rendered_folder + "gallery.html", "w").write(template_string)
             self.path = rendered_folder + "gallery.html"
+
         elif self.path == "/programming_journey.html":
             template_string = open(template_folder + "programming_journey.template.html").read().format(header = navbar, scripts = body_script)
             open(rendered_folder + "programming_journey.html", "w").write(template_string)
             self.path = rendered_folder + "programming_journey.html"
+
         elif self.path == "/poems.html":
             template_string = open(template_folder + "poems.template.html").read().format(header = navbar, scripts = body_script)
             open(rendered_folder + "poems.html", "w").write(template_string)
             self.path = rendered_folder + "poems.html"
+
         elif self.path == "/my_cv.html":
             template_string = open(template_folder + "my_cv.template.html").read().format(header = navbar, scripts = body_script)
             open(rendered_folder + "my_cv.html", "w").write(template_string)
             self.path = rendered_folder + "my_cv.html"
-        elif self.path == "/blog-posts/first-post.html":
-            template_string = open("blog-posts/first-post.html").read().format(header = navbar, scripts = body_script)
-            open(rendered_folder + "first-post.html", "w").write(template_string)
-            self.path = rendered_folder + "first-post.html"
-        elif self.path == "/blog-posts/my-childhood.html":
-            template_string = open("blog-posts/my-childhood.html").read().format(header = navbar, scripts = body_script)
-            open(rendered_folder + "my-childhood.html", "w").write(template_string)
-            self.path = rendered_folder + "my-childhood.html"
-        elif self.path == "/blog-posts/who-is-syd-barret.html":
-            template_string = open("blog-posts/who-is-syd-barret.html").read().format(header = navbar, scripts = body_script)
-            open(rendered_folder + "who-is-syd-barret.html", "w").write(template_string)
-            self.path = rendered_folder + "who-is-syd-barret.html"
+
+        elif self.path[-4:] == '.jpg':
+            print(f'MY SERVER: I got a request for an image. So I am sending {self.path} as response.')
+
         else:
             self.path = "404.html"
+
         print(f'MY SERVER: The redirected path is: {self.path}')
 
-        
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
 
