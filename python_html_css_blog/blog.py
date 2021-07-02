@@ -2,7 +2,7 @@ import http.server
 import socketserver
 import os
 
-PORT = 8000
+PORT = 8001
 rendered_folder = 'rendered_html/'
 template_folder = 'template_html/'
 
@@ -67,6 +67,9 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             self.path = rendered_folder + self.path[1:]
             get_file = True
         
+        if self.path.endswith('.jpg'):
+            get_file = True
+
         if not get_file:
             self.path = "404.html"
         print(f'MY SERVER: The redirected path is: {self.path}')
