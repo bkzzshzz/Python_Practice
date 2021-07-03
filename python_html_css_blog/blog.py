@@ -59,7 +59,12 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
 
         
 
-        pages_in_blog = os.listdir("./rendered_html")
+        template_files = os.listdir("./template_html")
+        pages_in_blog = []
+
+        for each_page_in_blog in template_files:
+            pages_in_blog.append(each_page_in_blog[:-14] + ".html")
+        
         
         if self.path[1:] in pages_in_blog:
             template_string = open(template_folder + self.path[1:-5] + ".template.html").read().format(header = navbar, scripts = body_script)
