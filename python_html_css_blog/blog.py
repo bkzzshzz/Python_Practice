@@ -1,14 +1,16 @@
 import http.server
 import socketserver
 import os
+import random
 
-PORT = 8001
+PORT = random.randrange(8000, 8005)
 rendered_folder = 'rendered_html/'
 template_folder = 'template_html/'
 
 class blog_server(http.server.SimpleHTTPRequestHandler):
    
     def do_GET(self):
+        
         navbar = open("partials/header.template.html").read()
         body_script = open("partials/scripts.template.html").read()
         print(f'BLOG SERVER: The requested path is: {self.path}')
@@ -44,7 +46,11 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             open(rendered_folder + "all-posts.html","w").write(template_string)
             self.path = rendered_folder + "all-posts.html"
             get_file = True
-
+        
+        elif self.path in ["/login.html" , "/signup.html"]:
+            self.path = "template_html/views" + self.path
+            get_file = True 
+            
         if self.path[0:12] == '/blog-posts/':
             requested_post_filename = self.path[12:]
             try:
@@ -57,14 +63,11 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 print (f'BLOG SERVER: {e}')
                 self.path = "404.html"
 
-        
-
         template_files = os.listdir("./template_html")
         pages_in_blog = []
 
         for each_page_in_blog in template_files:
             pages_in_blog.append(each_page_in_blog[:-14] + ".html")
-        
         
         if self.path[1:] in pages_in_blog:
             template_string = open(template_folder + self.path[1:-5] + ".template.html").read().format(header = navbar, scripts = body_script)
@@ -72,11 +75,17 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             self.path = rendered_folder + self.path[1:]
             get_file = True
         
-        if self.path.endswith('.jpg'):
-            get_file = True
+        valid_extensions = ['.jpg', '.css', '.js', '.eot', '.tff', '.woff', '.woff2', '.ico']
+
+        for extension in valid_extensions:
+            if self.path.endswith(extension):
+                get_file = True
+                break
+        #to do social media icons not loading
 
         if not get_file:
             self.path = "404.html"
+            self.send_response(404)
         print(f'MY SERVER: The redirected path is: {self.path}')
 
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
