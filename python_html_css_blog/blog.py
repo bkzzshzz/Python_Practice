@@ -4,8 +4,8 @@ import os
 import random
 
 PORT = random.randrange(8000, 8005)
-rendered_folder = 'rendered_html/'
-template_folder = 'template_html/'
+rendered_folder = 'rendered-html/'
+template_folder = 'template-html/'
 
 class blog_server(http.server.SimpleHTTPRequestHandler):
    
@@ -48,7 +48,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             get_file = True
         
         elif self.path in ["/login.html" , "/signup.html"]:
-            self.path = "template_html/views" + self.path
+            self.path = "template-html/views" + self.path
             get_file = True 
             
         if self.path[0:12] == '/blog-posts/':
@@ -63,7 +63,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 print (f'BLOG SERVER: {e}')
                 self.path = "404.html"
 
-        template_files = os.listdir("./template_html")
+        template_files = os.listdir("./template-html")
         pages_in_blog = []
 
         for each_page_in_blog in template_files:
