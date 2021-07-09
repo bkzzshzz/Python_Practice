@@ -112,7 +112,7 @@ input[type=checkbox]:not(old) + label > span{
   background-image :         linear-gradient(rgb(255,255,255),rgb(255,255,255 ));
   vertical-align   : bottom;
 }
-input[type=checkbox]:not(old):checked + label > span,{
+input[type=checkbox]:not(old):checked + label > span{
     background-image :    -moz-linear-gradient(rgb(255,255,255),rgb(255,255,255));
     background-image :     -ms-linear-gradient(rgb(255,255,255),rgb(255,255,255));
     background-image :      -o-linear-gradient(rgb(255,255,255),rgb(255,255,255));
@@ -146,7 +146,7 @@ label {
 }
 label.error {
     position: relative;
-    background: url('../images/unchecked.gif') no-repeat;
+    background: url('/static/images/unchecked.gif') no-repeat;
     background-position-y: 3px;
     padding-left: 20px;
     display: block;
