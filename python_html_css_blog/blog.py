@@ -155,7 +155,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
                 self.path = template_folder + "views/ren-signup.html"
 
-            elif not password_match:
+            elif not password_match(password, re_password):
                 rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Passwords do not match.")
                 open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
                 self.path = template_folder + "views/ren-signup.html"
