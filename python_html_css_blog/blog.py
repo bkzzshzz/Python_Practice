@@ -3,6 +3,31 @@ import socketserver
 import os
 import random
 
+def valid_name(name):
+    for each_letter in name:
+        if each_letter == "+" or each_letter.isalpha():
+            result =  True
+        else:    
+            result = False
+            break
+    return result
+
+
+
+def email_okay(email, variable):
+    if email not in variable:
+        return True
+
+
+
+def password_match(password, re_password):
+    if password == re_password:
+        return True
+    else:
+        return False
+
+
+
 PORT = random.randrange(8000, 8005)
 rendered_folder = 'rendered-html/'
 template_folder = 'template-html/'
@@ -89,6 +114,76 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
         print(f'MY SERVER: The redirected path is: {self.path}')
 
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+    def do_POST(self):
+        if self.path == "/signup":
+            content_length = int(self.headers['Content-Length'])
+            post_data_bytes = self.rfile.read(content_length)
+            post_data_str = post_data_bytes.decode("UTF-8")
+            list_of_post_data = post_data_str.split('&')
+            post_data_dict = {}
+
+            for item in list_of_post_data:
+                title, value = item.split('=')
+                post_data_dict[title] = value
+
+            name = str(post_data_dict['name'])
+            email = str(post_data_dict['email'])
+            password = str(post_data_dict['pass'])
+            re_password = str(post_data_dict['re_pass'])
+            variable = open("user-info.txt").read()
+            try:
+                checkbox = str(post_data_dict['agree-term'])
+                # open("user-info.txt", "a").write(name + ", " + email + ", " + password + ", " + re_password +  ", " + checkbox + "\n")
+            except:
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Checkbox not checked.")
+                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
+                self.path = template_folder + "views/ren-signup.html"
+            
+            if not valid_name(name):
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Invalid name.")
+                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
+                self.path = template_folder + "views/ren-signup.html"
+
+            elif not email_okay(email, variable):
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Email already exists.")
+                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
+                self.path = template_folder + "views/ren-signup.html"
+
+            elif password == None or re_password == None:
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Password cannot be blank.")
+                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
+                self.path = template_folder + "views/ren-signup.html"
+
+            elif not password_match:
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Passwords do not match.")
+                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
+                self.path = template_folder + "views/ren-signup.html"
+            
+            else:
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Success!")
+                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
+                open("user-info.txt", "a").write(name + ", " + email + ", " + password + "\n")
+                self.path = template_folder + "views/ren-signup.html"
+
+                
+
+
+            
+        return http.server.SimpleHTTPRequestHandler.do_GET(self)
+            
+            
+
+            # Check name valid_name(name))
+            # check email by valid_email(email, variable)
+            # check password match match_password(password, re_password) 
+
+            # if email not in variable:
+            #     open("user-info.txt", "a").write(name + ", " + email + ", " + password + ", " + re_password + ", " + signup_status + "\n")
+            # else:
+            #     print("The email exists.")
+            
+            
 
 if __name__ == '__main__':
     print (f"BLOG SERVER: I am running on http://localhost:{PORT}")
