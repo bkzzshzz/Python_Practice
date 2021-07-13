@@ -10,6 +10,7 @@ def valid_name(name):
         else:    
             result = False
             break
+    
     return result
 
 
@@ -116,6 +117,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
     def do_POST(self):
+
         if self.path == "/signup":
             content_length = int(self.headers['Content-Length'])
             post_data_bytes = self.rfile.read(content_length)
@@ -131,7 +133,10 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             email = str(post_data_dict['email'])
             password = str(post_data_dict['pass'])
             re_password = str(post_data_dict['re_pass'])
-            variable = open("user-info.txt").read()
+            try:
+                variable = open("user-info.txt").read()
+            except:
+                variable = open("user-info.txt", "w")
             
             
             if not valid_name(name):
@@ -162,7 +167,6 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                     open("user-info.txt", "a").write(name + ", " + email + ", " + password + "\n")
                     self.path = template_folder + "views/ren-signup.html"
                 except:
-                    print("LOL")
                     rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Checkbox not checked.")
                     open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
                     self.path = template_folder + "views/ren-signup.html"
