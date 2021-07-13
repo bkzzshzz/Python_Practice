@@ -4,15 +4,30 @@ import os
 import random
 
 def valid_name(name):
+    result = ""
     for each_letter in name:
-        if each_letter.isalpha():
+        if each_letter == "+" or each_letter.isalpha():
             result =  True
         else:    
             result = False
             break
-    
     return result
 
+
+def proper_name(name):
+    words_in_name = name.split("+")
+    temp_name = []
+    for each_word in words_in_name:
+        if each_word != "":
+            temp_name.append(each_word)
+    words_in_name = temp_name.copy()
+    temp_name = []
+    for each_word in words_in_name:
+        temp_word = each_word.lower()
+        temp_word = temp_word[0].upper() + temp_word[1:]
+        temp_name.append(temp_word)
+    words_in_name = temp_name.copy()
+    return " ".join(words_in_name)
 
 
 def email_okay(email, variable):
@@ -20,13 +35,11 @@ def email_okay(email, variable):
         return True
 
 
-
 def password_match(password, re_password):
     if password == re_password:
         return True
     else:
         return False
-
 
 
 PORT = random.randrange(8000, 8005)
@@ -130,11 +143,6 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 post_data_dict[title] = value
 
             temp_name = str(post_data_dict['name'])
-            name = ""
-            for each_letter in temp_name:
-                if each_letter != "+":
-                    name = name + each_letter
-            
             email = str(post_data_dict['email'])
             password = str(post_data_dict['pass'])
             re_password = str(post_data_dict['re_pass'])
@@ -144,7 +152,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 variable = open("user-info.txt", "w")
             
             
-            if not valid_name(name):
+            if not valid_name(temp_name):
                 rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Invalid name")
                 open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
                 self.path = template_folder + "views/ren-signup.html"
@@ -170,8 +178,10 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 self.path = template_folder + "views/ren-signup.html"
             
             else:
+                name = proper_name(temp_name)
                 try:
                     str(post_data_dict['agree-term'])
+                    
                     rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Success!")
                     open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
                     open("user-info.txt", "a").write(name + ", " + email + ", " + password + "\n")
