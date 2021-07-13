@@ -5,7 +5,7 @@ import random
 
 def valid_name(name):
     for each_letter in name:
-        if each_letter == "+" or each_letter.isalpha():
+        if each_letter.isalpha():
             result =  True
         else:    
             result = False
@@ -129,7 +129,12 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 title, value = item.split('=')
                 post_data_dict[title] = value
 
-            name = str(post_data_dict['name'])
+            temp_name = str(post_data_dict['name'])
+            name = ""
+            for each_letter in temp_name:
+                if each_letter != "+":
+                    name = name + each_letter
+            
             email = str(post_data_dict['email'])
             password = str(post_data_dict['pass'])
             re_password = str(post_data_dict['re_pass'])
@@ -140,22 +145,27 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             
             
             if not valid_name(name):
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Invalid name.")
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Invalid name")
                 open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
                 self.path = template_folder + "views/ren-signup.html"
 
             elif not email_okay(email, variable):
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Email already exists.")
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Email already exists")
                 open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
                 self.path = template_folder + "views/ren-signup.html"
 
             elif password == None or re_password == None:
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Password cannot be blank.")
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Password cannot be blank")
+                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
+                self.path = template_folder + "views/ren-signup.html"
+            
+            elif len(password) < 6:
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Password should be longer than 6 characters")
                 open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
                 self.path = template_folder + "views/ren-signup.html"
 
             elif not password_match(password, re_password):
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Passwords do not match.")
+                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Passwords do not match")
                 open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
                 self.path = template_folder + "views/ren-signup.html"
             
@@ -167,7 +177,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                     open("user-info.txt", "a").write(name + ", " + email + ", " + password + "\n")
                     self.path = template_folder + "views/ren-signup.html"
                 except:
-                    rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Checkbox not checked.")
+                    rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Checkbox not checked")
                     open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
                     self.path = template_folder + "views/ren-signup.html"
 
