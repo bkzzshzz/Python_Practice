@@ -132,13 +132,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             password = str(post_data_dict['pass'])
             re_password = str(post_data_dict['re_pass'])
             variable = open("user-info.txt").read()
-            try:
-                checkbox = str(post_data_dict['agree-term'])
-                # open("user-info.txt", "a").write(name + ", " + email + ", " + password + ", " + re_password +  ", " + checkbox + "\n")
-            except:
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Checkbox not checked.")
-                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
-                self.path = template_folder + "views/ren-signup.html"
+            
             
             if not valid_name(name):
                 rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Invalid name.")
@@ -161,30 +155,24 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 self.path = template_folder + "views/ren-signup.html"
             
             else:
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Success!")
-                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
-                open("user-info.txt", "a").write(name + ", " + email + ", " + password + "\n")
-                self.path = template_folder + "views/ren-signup.html"
+                try:
+                    str(post_data_dict['agree-term'])
+                    rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Success!")
+                    open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
+                    open("user-info.txt", "a").write(name + ", " + email + ", " + password + "\n")
+                    self.path = template_folder + "views/ren-signup.html"
+                except:
+                    print("LOL")
+                    rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Checkbox not checked.")
+                    open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
+                    self.path = template_folder + "views/ren-signup.html"
 
                 
 
-
-            
+                
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
             
             
-
-            # Check name valid_name(name))
-            # check email by valid_email(email, variable)
-            # check password match match_password(password, re_password) 
-
-            # if email not in variable:
-            #     open("user-info.txt", "a").write(name + ", " + email + ", " + password + ", " + re_password + ", " + signup_status + "\n")
-            # else:
-            #     print("The email exists.")
-            
-            
-
 if __name__ == '__main__':
     print (f"BLOG SERVER: I am running on http://localhost:{PORT}")
     my_server = socketserver.TCPServer(("", PORT), blog_server)
