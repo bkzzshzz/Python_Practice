@@ -2,6 +2,7 @@ import http.server
 import socketserver
 import os
 import random
+import csv
 
 def valid_name(name):
     result = ""
@@ -86,8 +87,16 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             self.path = rendered_folder + "all-posts.html"
             get_file = True
         
-        elif self.path in ["/login.html" , "/signup.html"]:
-            self.path = "template-html/views" + self.path
+        elif self.path == "/signup.html":
+            template_string = open(template_folder + "views/signup.template.html").read().format(message = "")
+            open(rendered_folder + "signup.html", "w").write(template_string)
+            self.path = rendered_folder + "signup.html"
+            get_file = True
+
+        elif self.path == "/login.html":
+            template_string = open(template_folder + "views/login.template.html").read().format(message = "")
+            open(rendered_folder + "login.html", "w").write(template_string)
+            self.path = rendered_folder + "login.html"
             get_file = True 
             
         if self.path[0:12] == '/blog-posts/':
@@ -149,51 +158,80 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             try:
                 variable = open("user-info.txt").read()
             except:
-                variable = open("user-info.txt", "w")
+                variable = open("user-info.txt", "w").write("name,email,password\n")
             
             
             if not valid_name(temp_name):
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Invalid name")
-                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
-                self.path = template_folder + "views/ren-signup.html"
+                template_string = open(template_folder + "views/signup.template.html").read().format(message = "Invalid name")
+                open(rendered_folder + "signup.html", "w").write(template_string)
+                self.path = rendered_folder + "signup.html"
 
             elif not email_okay(email, variable):
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Email already exists")
-                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
-                self.path = template_folder + "views/ren-signup.html"
+                template_string = open(template_folder + "views/signup.template.html").read().format(message = "Email already exists")
+                open(rendered_folder + "signup.html", "w").write(template_string)
+                self.path = rendered_folder + "signup.html"
 
             elif password == None or re_password == None:
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Password cannot be blank")
-                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
-                self.path = template_folder + "views/ren-signup.html"
+                template_string = open(template_folder + "views/signup.template.html").read().format(message = "Password cannot be blank")
+                open(rendered_folder + "signup.html", "w").write(template_string)
+                self.path = rendered_folder + "signup.html"
             
             elif len(password) < 6:
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Password should be longer than 6 characters")
-                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
-                self.path = template_folder + "views/ren-signup.html"
+                template_string = open(template_folder + "views/signup.template.html").read().format(message = "Password should be longer than 6 characters")
+                open(rendered_folder + "signup.html", "w").write(template_string)
+                self.path = rendered_folder + "signup.html"
 
             elif not password_match(password, re_password):
-                rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Passwords do not match")
-                open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
-                self.path = template_folder + "views/ren-signup.html"
+                template_string = open(template_folder + "views/signup.template.html").read().format(message = "Passwords do not match")
+                open(rendered_folder + "signup.html", "w").write(template_string)
+                self.path = rendered_folder + "signup.html"
             
             else:
                 name = proper_name(temp_name)
                 try:
                     str(post_data_dict['agree-term'])
-                    
-                    rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Success!")
-                    open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
+                    template_string = open(template_folder + "views/signup.template.html").read().format(message = "Success!")
+                    open(rendered_folder + "signup.html", "w").write(template_string)
                     open("user-info.txt", "a").write(name + ", " + email + ", " + password + "\n")
-                    self.path = template_folder + "views/ren-signup.html"
+                    self.path = rendered_folder + "signup.html"
                 except:
-                    rendered_file = open(template_folder + "views/signup.template.html").read().format(message = "Checkbox not checked")
-                    open(template_folder + "views/ren-signup.html", "w").write(rendered_file)
-                    self.path = template_folder + "views/ren-signup.html"
+                    template_string = open(template_folder + "views/signup.template.html").read().format(message = "Checkbox not checked")
+                    open(rendered_folder + "signup.html", "w").write(template_string)
+                    self.path = rendered_folder + "signup.html"
+            
+        if self.path == "/login":
+            content_length = int(self.headers['Content-Length'])
+            post_data_bytes = self.rfile.read(content_length)
+            post_data_str = post_data_bytes.decode("UTF-8")
+            list_of_post_data = post_data_str.split('&')
+            post_data_dict = {}
 
+            for item in list_of_post_data:
+                title, value = item.split('=')
+                post_data_dict[title] = value
+            
+            email = post_data_dict['email']
+            password = post_data_dict['your_pass']
+            print(email)
+            log_status = False
+            with open("user-info.txt", "r") as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                for row in csv_reader:
+                    if email == row['email'].strip() and password == row['password'].strip():
+                        template_string = open(template_folder + "views/login.template.html").read().format(message = "You have been logged in as " + row['name'].strip())
+                        open(rendered_folder + "login.html", "w").write(template_string)
+                        self.path = rendered_folder + "login.html"
+                        log_status = True
+                        break
                 
+                if not log_status:
+                    template_string = open(template_folder + "views/login.template.html").read().format(message = "Incorrect email or password")
+                    open(rendered_folder + "login.html", "w").write(template_string)
+                    self.path = rendered_folder + "login.html"
 
-                
+
+
+
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
             
             
