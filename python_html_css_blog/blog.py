@@ -46,12 +46,21 @@ def password_match(password, re_password):
 PORT = random.randrange(8000, 8005)
 rendered_folder = 'rendered-html/'
 template_folder = 'template-html/'
+log_status = False
+logged_text = '''
+<li><a href ="/login.html" target = "_blank">Login</a></li>
+<li><a href = "/signup.html" target = "_blank">Signup</a></li>
+'''
 
 class blog_server(http.server.SimpleHTTPRequestHandler):
    
     def do_GET(self):
+
+        if log_status:
+            navbar = open("partials/header.template.html").read().format(status = logged_text)
+        else:
+            navbar = open("partials/header.template.html").read().format(status = logged_text)
         
-        navbar = open("partials/header.template.html").read()
         body_script = open("partials/scripts.template.html").read()
         print(f'BLOG SERVER: The requested path is: {self.path}')
         file_list = os.listdir("./blog-posts")
@@ -212,15 +221,16 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             
             email = post_data_dict['email']
             password = post_data_dict['your_pass']
-            print(email)
-            log_status = False
             with open("user-info.txt", "r") as csv_file:
                 csv_reader = csv.DictReader(csv_file)
                 for row in csv_reader:
                     if email == row['email'].strip() and password == row['password'].strip():
+                        global logged_text 
+                        logged_text = '''<li><p class="navbar-text">Signed in as ''' + row['name'] + "</p></li>"
                         template_string = open(template_folder + "views/login.template.html").read().format(message = "You have been logged in as " + row['name'].strip())
                         open(rendered_folder + "login.html", "w").write(template_string)
                         self.path = rendered_folder + "login.html"
+                        global log_status
                         log_status = True
                         break
                 
@@ -228,9 +238,6 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                     template_string = open(template_folder + "views/login.template.html").read().format(message = "Incorrect email or password")
                     open(rendered_folder + "login.html", "w").write(template_string)
                     self.path = rendered_folder + "login.html"
-
-
-
 
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
             
