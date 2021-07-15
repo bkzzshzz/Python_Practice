@@ -47,19 +47,26 @@ PORT = random.randrange(8000, 8005)
 rendered_folder = 'rendered-html/'
 template_folder = 'template-html/'
 log_status = False
-logged_text = '''
-<li><a href ="/login.html" target = "_blank">Login</a></li>
-<li><a href = "/signup.html" target = "_blank">Signup</a></li>
-'''
+
 
 class blog_server(http.server.SimpleHTTPRequestHandler):
    
     def do_GET(self):
 
+        if self.path == "/logout":
+            global log_status
+            log_status = False
+            self.path = "/home"
+
+        unlogged_text = '''
+        <li><a href ="/login" target = "_blank">Login</a></li>
+        <li><a href = "/signup" target = "_blank">Signup</a></li>
+        '''
+
         if log_status:
             navbar = open("partials/header.template.html").read().format(status = logged_text)
         else:
-            navbar = open("partials/header.template.html").read().format(status = logged_text)
+            navbar = open("partials/header.template.html").read().format(status = unlogged_text)
         
         body_script = open("partials/scripts.template.html").read()
         print(f'BLOG SERVER: The requested path is: {self.path}')
@@ -83,7 +90,9 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             title_from_file = file_content_str[starting_pos:ending_pos]
             list_of_links = list_of_links + link_for_single_file.format(file_name = name_of_file, file_title = title_from_file)
 
-        if self.path == '/home.html' or self.path == "/":
+        
+        
+        if self.path == '/home' or self.path == "/":
             new_file = template_string.format(variable = list_of_links, header = navbar, scripts = body_script)
             open(rendered_folder + "home.html", "w").write(new_file)
             self.path = rendered_folder + "home.html"
@@ -96,13 +105,13 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             self.path = rendered_folder + "all-posts.html"
             get_file = True
         
-        elif self.path == "/signup.html":
+        elif self.path == "/signup":
             template_string = open(template_folder + "views/signup.template.html").read().format(message = "")
             open(rendered_folder + "signup.html", "w").write(template_string)
             self.path = rendered_folder + "signup.html"
             get_file = True
 
-        elif self.path == "/login.html":
+        elif self.path == "/login":
             template_string = open(template_folder + "views/login.template.html").read().format(message = "")
             open(rendered_folder + "login.html", "w").write(template_string)
             self.path = rendered_folder + "login.html"
@@ -225,9 +234,18 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 csv_reader = csv.DictReader(csv_file)
                 for row in csv_reader:
                     if email == row['email'].strip() and password == row['password'].strip():
-                        global logged_text 
-                        logged_text = '''<li><p class="navbar-text">Signed in as ''' + row['name'] + "</p></li>"
-                        template_string = open(template_folder + "views/login.template.html").read().format(message = "You have been logged in as " + row['name'].strip())
+                        global logged_text
+                        logged_text = '''
+                        <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                        aria-expanded="false">Signed in as ''' + row['name'] + '''<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                        <li><a href="/logout">Log out</a></li>
+                        </ul>
+                        </ul>
+                        '''
+                        template_string = open(template_folder + "views/login.template.html").read().format(message = "Logged in as " + row['name'].strip() + '''. Go to <a href="/home">home</a> page.''')
                         open(rendered_folder + "login.html", "w").write(template_string)
                         self.path = rendered_folder + "login.html"
                         global log_status
