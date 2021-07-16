@@ -4,39 +4,52 @@ import os
 import random
 import csv
 
+
 def valid_name(name):
+
     result = ""
+
     for each_letter in name:
         if each_letter == "+" or each_letter.isalpha():
             result =  True
         else:    
             result = False
             break
+
     return result
 
 
 def proper_name(name):
+
     words_in_name = name.split("+")
     temp_name = []
+
     for each_word in words_in_name:
+
         if each_word != "":
             temp_name.append(each_word)
+
     words_in_name = temp_name.copy()
     temp_name = []
+
     for each_word in words_in_name:
         temp_word = each_word.lower()
         temp_word = temp_word[0].upper() + temp_word[1:]
         temp_name.append(temp_word)
+
     words_in_name = temp_name.copy()
+
     return " ".join(words_in_name)
 
 
 def email_okay(email, variable):
+
     if email not in variable:
         return True
 
 
 def password_match(password, re_password):
+
     if password == re_password:
         return True
     else:
@@ -53,11 +66,10 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
    
     def do_GET(self):
 
-        if self.path == "/logout":
+        if self.path == "/homepage":
             global log_status
             log_status = False
-            self.path = "/home"
-
+            
         unlogged_text = '''
         <li><a href ="/login" target = "_blank">Login</a></li>
         <li><a href = "/signup" target = "_blank">Signup</a></li>
@@ -79,6 +91,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
         '''
         get_file = False
 
+
         for name_of_file in file_list:
             # Following code extracts title form <title> -------- </title> section of each file
             file_handle = open("./blog-posts/" + name_of_file)
@@ -91,13 +104,11 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             list_of_links = list_of_links + link_for_single_file.format(file_name = name_of_file, file_title = title_from_file)
 
         
-        
-        if self.path == '/home' or self.path == "/":
+        if self.path == '/home' or self.path == "/" or self.path == "/homepage":
             new_file = template_string.format(variable = list_of_links, header = navbar, scripts = body_script)
             open(rendered_folder + "home.html", "w").write(new_file)
             self.path = rendered_folder + "home.html"
             get_file = True
-
 
         elif self.path == "/all-posts.html":
             template_string = open(template_folder + "all-posts.template.html").read().format(variable = list_of_links, header = navbar, scripts = body_script)
@@ -119,6 +130,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             
         if self.path[0:12] == '/blog-posts/':
             requested_post_filename = self.path[12:]
+
             try:
                 template_string = open ('blog-posts/' + requested_post_filename).read().format(header = navbar, scripts = body_script)
                 open(rendered_folder + requested_post_filename, "w").write(template_string)
@@ -132,8 +144,10 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
         template_files = os.listdir("./template-html")
         pages_in_blog = []
 
+
         for each_page_in_blog in template_files:
             pages_in_blog.append(each_page_in_blog[:-14] + ".html")
+        
         
         if self.path[1:] in pages_in_blog:
             template_string = open(template_folder + self.path[1:-5] + ".template.html").read().format(header = navbar, scripts = body_script)
@@ -143,18 +157,21 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
         
         valid_extensions = ['.jpg', '.css', '.js', '.eot', '.tff', '.woff', '.woff2', '.ico']
 
+
         for extension in valid_extensions:
             if self.path.endswith(extension):
                 get_file = True
                 break
-        #to do social media icons not loading
+
 
         if not get_file:
             self.path = "404.html"
             self.send_response(404)
+
         print(f'MY SERVER: The redirected path is: {self.path}')
 
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
 
     def do_POST(self):
 
@@ -169,15 +186,16 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 title, value = item.split('=')
                 post_data_dict[title] = value
 
+
             temp_name = str(post_data_dict['name'])
             email = str(post_data_dict['email'])
             password = str(post_data_dict['pass'])
             re_password = str(post_data_dict['re_pass'])
+
             try:
                 variable = open("user-info.txt").read()
             except:
                 variable = open("user-info.txt", "w").write("name,email,password\n")
-            
             
             if not valid_name(temp_name):
                 template_string = open(template_folder + "views/signup.template.html").read().format(message = "Invalid name")
@@ -206,6 +224,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             
             else:
                 name = proper_name(temp_name)
+
                 try:
                     str(post_data_dict['agree-term'])
                     template_string = open(template_folder + "views/signup.template.html").read().format(message = "Success!")
@@ -216,6 +235,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                     template_string = open(template_folder + "views/signup.template.html").read().format(message = "Checkbox not checked")
                     open(rendered_folder + "signup.html", "w").write(template_string)
                     self.path = rendered_folder + "signup.html"
+
             
         if self.path == "/login":
             content_length = int(self.headers['Content-Length'])
@@ -224,14 +244,18 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             list_of_post_data = post_data_str.split('&')
             post_data_dict = {}
 
+
             for item in list_of_post_data:
                 title, value = item.split('=')
                 post_data_dict[title] = value
-            
+
+
             email = post_data_dict['email']
             password = post_data_dict['your_pass']
+
             with open("user-info.txt", "r") as csv_file:
                 csv_reader = csv.DictReader(csv_file)
+
                 for row in csv_reader:
                     if email == row['email'].strip() and password == row['password'].strip():
                         global logged_text
@@ -241,7 +265,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                         aria-expanded="false">Signed in as ''' + row['name'] + '''<span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                        <li><a href="/logout">Log out</a></li>
+                        <li><a href="/homepage">Log out</a></li>
                         </ul>
                         </ul>
                         '''
@@ -256,6 +280,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                     template_string = open(template_folder + "views/login.template.html").read().format(message = "Incorrect email or password")
                     open(rendered_folder + "login.html", "w").write(template_string)
                     self.path = rendered_folder + "login.html"
+
 
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
             
