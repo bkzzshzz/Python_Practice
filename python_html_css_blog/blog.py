@@ -3,11 +3,16 @@ import socketserver
 import os
 import random
 import csv
+import requests
+from requests.sessions import session
+from http import cookies
+from http.cookies import SimpleCookie
 
 
 def valid_name(name):
 
     result = ""
+
 
     for each_letter in name:
         if each_letter == "+" or each_letter.isalpha():
@@ -15,6 +20,7 @@ def valid_name(name):
         else:    
             result = False
             break
+    
 
     return result
 
@@ -24,18 +30,21 @@ def proper_name(name):
     words_in_name = name.split("+")
     temp_name = []
 
-    for each_word in words_in_name:
 
+    for each_word in words_in_name:
         if each_word != "":
             temp_name.append(each_word)
 
+
     words_in_name = temp_name.copy()
     temp_name = []
+
 
     for each_word in words_in_name:
         temp_word = each_word.lower()
         temp_word = temp_word[0].upper() + temp_word[1:]
         temp_name.append(temp_word)
+
 
     words_in_name = temp_name.copy()
 
@@ -63,8 +72,11 @@ log_status = False
 
 
 class blog_server(http.server.SimpleHTTPRequestHandler):
-   
+
     def do_GET(self):
+
+        cookies = SimpleCookie(self.headers.get('Cookie'))
+        print(f"The cookie sent by the browser is {cookies}")
 
         if self.path == "/homepage":
             global log_status
@@ -91,9 +103,8 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
         '''
         get_file = False
 
-
+        
         for name_of_file in file_list:
-            # Following code extracts title form <title> -------- </title> section of each file
             file_handle = open("./blog-posts/" + name_of_file)
             file_content_str = file_handle.read()
             temp_file = file_content_str
@@ -182,6 +193,7 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             list_of_post_data = post_data_str.split('&')
             post_data_dict = {}
 
+
             for item in list_of_post_data:
                 title, value = item.split('=')
                 post_data_dict[title] = value
@@ -191,6 +203,8 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             email = str(post_data_dict['email'])
             password = str(post_data_dict['pass'])
             re_password = str(post_data_dict['re_pass'])
+            global name
+            name = proper_name(temp_name)
 
             try:
                 variable = open("user-info.txt").read()
@@ -223,8 +237,6 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                 self.path = rendered_folder + "signup.html"
             
             else:
-                name = proper_name(temp_name)
-
                 try:
                     str(post_data_dict['agree-term'])
                     template_string = open(template_folder + "views/signup.template.html").read().format(message = "Success!")
@@ -236,7 +248,6 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                     open(rendered_folder + "signup.html", "w").write(template_string)
                     self.path = rendered_folder + "signup.html"
 
-            
         if self.path == "/login":
             content_length = int(self.headers['Content-Length'])
             post_data_bytes = self.rfile.read(content_length)
@@ -253,11 +264,26 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
             email = post_data_dict['email']
             password = post_data_dict['your_pass']
 
+
             with open("user-info.txt", "r") as csv_file:
                 csv_reader = csv.DictReader(csv_file)
 
+
                 for row in csv_reader:
                     if email == row['email'].strip() and password == row['password'].strip():
+                    
+                        self.send_response(200)
+                        self.send_header("Content-type", "text/html")
+
+                        cookie = cookies.SimpleCookie()
+                        cookie['user_name'] = row['name']
+                        cookie['email'] = row['email']
+
+                        
+                        for cookie_value in cookie.values():
+                            self.send_header("Set-Cookie", cookie_value.OutputString())
+
+
                         global logged_text
                         logged_text = '''
                         <ul class="nav navbar-nav navbar-right">
@@ -270,20 +296,17 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                         </ul>
                         '''
                         template_string = open(template_folder + "views/login.template.html").read().format(message = "Logged in as " + row['name'].strip() + '''. Go to <a href="/home">home</a> page.''')
-                        open(rendered_folder + "login.html", "w").write(template_string)
-                        self.path = rendered_folder + "login.html"
                         global log_status
                         log_status = True
                         break
-                
+
                 if not log_status:
                     template_string = open(template_folder + "views/login.template.html").read().format(message = "Incorrect email or password")
-                    open(rendered_folder + "login.html", "w").write(template_string)
-                    self.path = rendered_folder + "login.html"
-
+                
+                open(rendered_folder + "login.html", "w").write(template_string)
+                self.path = rendered_folder + "login.html"
 
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
-            
             
 if __name__ == '__main__':
     print (f"BLOG SERVER: I am running on http://localhost:{PORT}")
