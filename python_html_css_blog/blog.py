@@ -7,6 +7,7 @@ import requests
 from requests.sessions import session
 from http import cookies
 from http.cookies import SimpleCookie
+from app_logic import blog_functions
 
 
 def valid_name(name):
@@ -75,22 +76,39 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
 
-        cookies = SimpleCookie(self.headers.get('Cookie'))
-        print(f"The cookie sent by the browser is {cookies}")
+        cookie = SimpleCookie(self.headers.get('Cookie'))
 
         if self.path == "/homepage":
-            global log_status
-            log_status = False
-            
-        unlogged_text = '''
-        <li><a href ="/login" target = "_blank">Login</a></li>
-        <li><a href = "/signup" target = "_blank">Signup</a></li>
-        '''
+            cookie['user_name'] = None
+            cookie['email'] = None
 
-        if log_status:
-            navbar = open("partials/header.template.html").read().format(status = logged_text)
+            
+            for cookie_value in cookie.values():
+                self.send_header("Set-Cookie", cookie_value.OutputString())
+
+
         else:
-            navbar = open("partials/header.template.html").read().format(status = unlogged_text)
+            cookie_data = self.headers['cookie']
+            username=""
+        
+        try:
+            username = cookie_data.rpartition(';')[0]
+            username = username[11:-1]
+            navbar = open("partials/header.template.html").read().format(status = '''
+                        <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                        aria-expanded="false">Signed in as ''' + username + '''<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                        <li><a href="/homepage">Log out</a></li>
+                        </ul>
+                        </ul>
+                        ''')
+        except:
+            navbar = open("partials/header.template.html").read().format(status =  '''
+                            <li><a href ="/login" target = "_blank">Login</a></li>
+                            <li><a href = "/signup" target = "_blank">Signup</a></li>
+                            ''')
         
         body_script = open("partials/scripts.template.html").read()
         print(f'BLOG SERVER: The requested path is: {self.path}')
@@ -271,10 +289,8 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
 
                 for row in csv_reader:
                     if email == row['email'].strip() and password == row['password'].strip():
-                    
                         self.send_response(200)
                         self.send_header("Content-type", "text/html")
-
                         cookie = cookies.SimpleCookie()
                         cookie['user_name'] = row['name']
                         cookie['email'] = row['email']
@@ -284,24 +300,10 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
                             self.send_header("Set-Cookie", cookie_value.OutputString())
 
 
-                        global logged_text
-                        logged_text = '''
-                        <ul class="nav navbar-nav navbar-right">
-                        <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                        aria-expanded="false">Signed in as ''' + row['name'] + '''<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                        <li><a href="/homepage">Log out</a></li>
-                        </ul>
-                        </ul>
-                        '''
                         template_string = open(template_folder + "views/login.template.html").read().format(message = "Logged in as " + row['name'].strip() + '''. Go to <a href="/home">home</a> page.''')
-                        global log_status
-                        log_status = True
                         break
-
-                if not log_status:
-                    template_string = open(template_folder + "views/login.template.html").read().format(message = "Incorrect email or password")
+                    else:
+                        template_string = open(template_folder + "views/login.template.html").read().format(message = "Incorrect email or password")
                 
                 open(rendered_folder + "login.html", "w").write(template_string)
                 self.path = rendered_folder + "login.html"
