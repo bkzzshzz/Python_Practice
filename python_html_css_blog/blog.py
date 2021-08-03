@@ -20,21 +20,28 @@ class blog_server(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
 
-        cookie = SimpleCookie(self.headers.get('Cookie'))
+        # cookie = SimpleCookie(self.headers.get('Cookie'))
+        cookie = cookies.SimpleCookie()
 
         if self.path == "/homepage":
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            cookie = cookies.SimpleCookie()
+                        
             cookie['user_name'] = None
             cookie['email'] = None
 
             
             for cookie_value in cookie.values():
                 self.send_header("Set-Cookie", cookie_value.OutputString())
+        
 
 
         else:
             cookie_data = self.headers['cookie']
             username=""
         
+        print(self.headers['cookie'])
         try:
             username = cookie_data.rpartition(';')[0]
             username = username[11:-1]
